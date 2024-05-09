@@ -6,12 +6,13 @@
 
 import * as THREE from "three";
 export class FirstPersonCameraControl {
-    constructor(camera, domElement, rayCastObjects) {
+    constructor(camera, domElement, rayCastObjects, actions) {
         this.camera = camera;
         this.domElement = domElement;
         this._isEnabled = false;
         // internal params for move forward/right
         this._rayCastObjects = rayCastObjects;
+        this._actions = actions;
         this._rayOriginOffset = new THREE.Vector3(0, -1, 0);
         this._camerLocalDirection = new THREE.Vector3();
         this._tmpVector = new THREE.Vector3();
@@ -43,6 +44,10 @@ export class FirstPersonCameraControl {
      */
     set colliders(colliders) {
         this._rayCastObjects = colliders;
+    }
+
+    set actions(actions) {
+        this._actions = actions;
     }
 
     /**
@@ -115,6 +120,7 @@ export class FirstPersonCameraControl {
                 this.rotateY(-1);
                 break;
             case 87: // w
+            console.log('this._actions', this._actions);
                 this._camerLocalDirection.z = 1;
                 break;
 

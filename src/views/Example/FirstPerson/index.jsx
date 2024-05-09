@@ -20,8 +20,26 @@ function Model({ result }) {
 
 /**人物模型 */
 function PersonModel({ result, personModel }) {
+  //实例化FirstPersonCameraControl
+  const camera = useThree((state) => state.camera);
+  const renderer = useThree((state) => {
+    return state.gl;
+  });
+  const firstperson = new FirstPersonCameraControl(camera, renderer.domElement);
+  firstperson.colliders = result;
+
   /**加载人物模型动画 */
   const modelRef = useRef();
+
+  /**gui可视化实时改变参数 */
+  const controls = useControls({
+    firstEnabled: false,
+    applyGravity: false,
+    applyCollision: false,
+    positionEasing: false,
+  });
+
+  /** 更新状态或调用其他函数 */
   useEffect(() => {
     const actions = {};
     const model = modelRef.current;
@@ -34,29 +52,8 @@ function PersonModel({ result, personModel }) {
       requestAnimationFrame(animate);
     };
     animate();
-    actions["TPose"].play(); // Play an animation "Idle"  "Run"  "TPose" "Walk"
-    return () => {
-      mixer.stopAllAction();
-    };
-  }, [personModel]);
-  //实例化FirstPersonCameraControl
-  const camera = useThree((state) => state.camera);
-  const renderer = useThree((state) => {
-    return state.gl;
-  });
-  const firstperson = new FirstPersonCameraControl(camera, renderer.domElement);
-  firstperson.colliders = result;
+    actions["Walk"].play(); // Play an animation "Idle"  "Run"  "TPose" "Walk"
 
-  /**gui可视化实时改变参数 */
-  const controls = useControls({
-    firstEnabled: false,
-    applyGravity: false,
-    applyCollision: false,
-    positionEasing: false,
-  });
-
-  /** 更新状态或调用其他函数 */
-  useEffect(() => {
     if (controls.firstEnabled) {
       camera.position.set(10, 3, 1.5);
       camera.lookAt(new THREE.Vector3(0, 0, 0));
@@ -64,6 +61,7 @@ function PersonModel({ result, personModel }) {
       firstperson.applyGravity = controls.applyGravity;
       firstperson.applyCollision = controls.applyCollision;
       firstperson.positionEasing = controls.positionEasing;
+      firstperson.actions = actions;
     } else {
       firstperson.enabled = false;
       var ray = new THREE.Ray();
@@ -71,6 +69,10 @@ function PersonModel({ result, personModel }) {
       ray.origin.setFromMatrixPosition(camera.matrixWorld);
       ray.direction.set(0, 0, 1).unproject(camera).sub(ray.origin).normalize();
     }
+
+    return () => {
+      mixer.stopAllAction();
+    };
   }, [
     controls.firstEnabled,
     controls.applyGravity,
