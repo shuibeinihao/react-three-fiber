@@ -27,7 +27,7 @@ function PersonModel({ result, personModel }) {
   });
   const firstperson = new FirstPersonCameraControl(camera, renderer.domElement);
   firstperson.colliders = result;
-
+  firstperson.personModel = personModel;
   /**加载人物模型动画 */
   const modelRef = useRef();
 
@@ -62,10 +62,10 @@ function PersonModel({ result, personModel }) {
       firstperson.applyCollision = controls.applyCollision;
       firstperson.positionEasing = controls.positionEasing;
       firstperson.actions = actions;
+      firstperson.personModel = personModel;
     } else {
       firstperson.enabled = false;
       var ray = new THREE.Ray();
-      console.log("camera.matrixWorld", camera.matrixWorld);
       ray.origin.setFromMatrixPosition(camera.matrixWorld);
       ray.direction.set(0, 0, 1).unproject(camera).sub(ray.origin).normalize();
     }
@@ -117,7 +117,7 @@ export default function App() {
     "/gltf/Soldier.glb",
     (loader) => {}
   );
-  personModel.scene.scale.set(0.6, 0.6, 0.6);
+  personModel.scene.scale.set(0.5, 0.5, 0.5);
   personModel.scene.position.set(8.5, 0.4, 1.8);
   personModel.scene.rotation.y = Math.PI / 2;
   return (

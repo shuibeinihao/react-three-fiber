@@ -6,13 +6,14 @@
 
 import * as THREE from "three";
 export class FirstPersonCameraControl {
-    constructor(camera, domElement, rayCastObjects, actions) {
+    constructor(camera, domElement, rayCastObjects, actions, personModel) {
         this.camera = camera;
         this.domElement = domElement;
         this._isEnabled = false;
         // internal params for move forward/right
         this._rayCastObjects = rayCastObjects;
         this._actions = actions;
+        this._personModel = personModel;
         this._rayOriginOffset = new THREE.Vector3(0, -1, 0);
         this._camerLocalDirection = new THREE.Vector3();
         this._tmpVector = new THREE.Vector3();
@@ -48,6 +49,10 @@ export class FirstPersonCameraControl {
 
     set actions(actions) {
         this._actions = actions;
+    }
+
+    set personModel(personModel) {
+        this._personModel = personModel;
     }
 
     /**
@@ -120,7 +125,6 @@ export class FirstPersonCameraControl {
                 this.rotateY(-1);
                 break;
             case 87: // w
-            console.log('this._actions', this._actions);
                 this._camerLocalDirection.z = 1;
                 break;
 
@@ -180,6 +184,7 @@ export class FirstPersonCameraControl {
     rotateX(value) {
         this._euler.y -= value * this.lookSpeed;
         this.camera.quaternion.setFromEuler(this._euler);
+        this._personModel.scene.quaternion.setFromEuler(this._euler);
     }
 
     /**
@@ -190,17 +195,18 @@ export class FirstPersonCameraControl {
     rotateY(value) {
         this._euler.x -= value * this.lookflag * 0.5 * this.lookSpeed;
         this.camera.quaternion.setFromEuler(this._euler);
+        this._personModel.scene.quaternion.setFromEuler(this._euler);
     }
 
     /**
      * @description: update current calcuate each frame.
      */
     update() {
-        console.log('update')
         //gravity test
         this.gravityTest();
         //collision test
         this.collisionTest();
+        console.log(this._personModel.scene.position.y);
     }
 
     gravityTest() {
@@ -209,6 +215,7 @@ export class FirstPersonCameraControl {
             this._fallingTime += 0.01;
             this._tmpVector.set(0, -1, 0);
             const intersect = this.hitTest();
+
             if (intersect) {
                 const newPosition = intersect.point.add(
                     new THREE.Vector3(0, this.playerHeight, 0)
@@ -219,15 +226,17 @@ export class FirstPersonCameraControl {
                         newPosition.y - this.camera.position.y < 0.2
                     ) {
                         //上下楼梯时逐步上升 以免明显顿挫感
-
                         this.camera.position.y +=
                             (newPosition.y - this.camera.position.y) * 0.08;
+                        this._personModel.scene.position.y +=
+                            (this.camera.position.y - newPosition.y ) * 0.0002;
                         this._fallingTime = 0;
                         isFalling = false;
                         return;
                     }
                 } else if (intersect.distance < this.playerHeight) {
                     this.camera.position.y = newPosition.y;
+                    this._personModel.scene.position.y = newPosition.y-1.2;
                     this._fallingTime = 0;
                     isFalling = false;
                 }
@@ -235,6 +244,8 @@ export class FirstPersonCameraControl {
 
             if (isFalling) {
                 this.camera.position.y -=
+                    this.g * Math.pow(this._fallingTime, 2);
+                    this._personModel.scene.position.y -=
                     this.g * Math.pow(this._fallingTime, 2);
             }
         }
@@ -256,6 +267,7 @@ export class FirstPersonCameraControl {
         }
 
         this.camera.position.addScaledVector(this._tmpVector, this.moveSpeed);
+        this._personModel.scene.position.addScaledVector(this._tmpVector, this.moveSpeed);
     }
 
     collisionTestZ() {
@@ -270,6 +282,7 @@ export class FirstPersonCameraControl {
         }
 
         this.camera.position.addScaledVector(this._tmpVector, this.moveSpeed);
+        this._personModel.scene.position.addScaledVector(this._tmpVector, this.moveSpeed);
     }
 
     hitTest() {
