@@ -14,7 +14,7 @@ export class FirstPersonCameraControl {
         this._rayCastObjects = rayCastObjects;
         this._actions = actions;
         this._personModel = personModel;
-        this._rayOriginOffset = new THREE.Vector3(0, -1, 0);
+        this._rayOriginOffset = new THREE.Vector3(0, 0, 0);
         this._camerLocalDirection = new THREE.Vector3();
         this._tmpVector = new THREE.Vector3();
         this._rayCaster = new THREE.Raycaster();
@@ -263,7 +263,7 @@ export class FirstPersonCameraControl {
         this._tmpVector.multiplyScalar(this._camerLocalDirection.x);
         if (this.applyCollision) {
             const intersect = this.hitTest();
-            if (intersect && intersect.distance < 0.3) {
+            if (intersect && intersect.distance < 2) {
                 return;
             }
         }
@@ -278,7 +278,7 @@ export class FirstPersonCameraControl {
         this._tmpVector.multiplyScalar(this._camerLocalDirection.z);
         if (this.applyCollision) {
             const intersect = this.hitTest();
-            if (intersect && intersect.distance < 0.3) {
+            if (intersect && intersect.distance < 2) {
                 return;
             }
         }
@@ -289,7 +289,8 @@ export class FirstPersonCameraControl {
 
     hitTest() {
         let result = null;
-        const origin = this.camera.position.clone().add(this._rayOriginOffset);
+        // const origin = this.camera.position.clone().add(this._rayOriginOffset);
+        const origin = this._personModel.scene.position.clone().add(this._rayOriginOffset);
         this._rayCaster.ray.origin = origin;
         this._rayCaster.ray.direction = this._tmpVector;
         const intersect = this._rayCaster.intersectObject(
