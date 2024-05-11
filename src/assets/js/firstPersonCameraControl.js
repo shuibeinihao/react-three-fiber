@@ -111,6 +111,8 @@ export class FirstPersonCameraControl {
         this._euler.y -= movementX * this.lookSpeed;
         this._euler.x -= movementY * this.lookflag * this.lookSpeed;
         this.camera.quaternion.setFromEuler(this._euler);
+        this._personModel.scene.quaternion.setFromEuler(this._euler);
+        
         this._prevMouseX = event.screenX;
         this._prevMouseY = event.screenY;
     }
