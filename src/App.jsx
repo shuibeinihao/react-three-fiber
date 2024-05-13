@@ -10,6 +10,7 @@ import Selection from "./views/Example/Selection";
 import Test from "./views/Example/Test";
 import Cannon from "./views/Example/Cannon";
 import FirstPerson from "./views/Example/FirstPerson";
+import FirstPersonDemo from "./views/Example/FirstPersonDemo";
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
       <Route path="/test" element={<Test />}></Route>
       <Route path="/cannon" element={<Cannon />}></Route>
       <Route path="/firstPerson" element={<FirstPerson />}></Route>
+      <Route path="/firstPersonDemo" element={<FirstPersonDemo />}></Route>
     </Routes>
   );
 }

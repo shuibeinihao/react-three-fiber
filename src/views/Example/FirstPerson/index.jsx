@@ -5,14 +5,13 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import { FirstPersonCameraControl } from "../../../assets/js/firstPersonCameraControl";
 
-import { OrbitControls, Stars } from "@react-three/drei";
+import { Stars } from "@react-three/drei";
 import { useControls } from "leva"; //快速设置gui
-/**模型操作 */
+/**房屋院子模型 */
 function Model({ result }) {
   /**加载模型 */
   return (
     <>
-      {/* <OrbitControls enabled={orbit} /> */}
       <primitive object={result} />
     </>
   );
@@ -28,16 +27,9 @@ function PersonModel({ result, personModel }) {
   const firstperson = new FirstPersonCameraControl(camera, renderer.domElement);
   firstperson.colliders = result;
   firstperson.personModel = personModel;
+  personModel.scene.add(camera);
   /**加载人物模型动画 */
   const modelRef = useRef();
-
-  /**gui可视化实时改变参数 */
-  const controls = useControls({
-    firstEnabled: false,
-    applyGravity: false,
-    applyCollision: false,
-    positionEasing: false,
-  });
 
   /** 更新状态或调用其他函数 */
   useEffect(() => {
@@ -54,31 +46,13 @@ function PersonModel({ result, personModel }) {
     animate();
     actions["Walk"].play(); // Play an animation "Idle"  "Run"  "TPose" "Walk"
 
-    if (controls.firstEnabled) {
-      camera.position.set(10, 3, 1.5);
-      camera.lookAt(new THREE.Vector3(0, 0, 0));
-      firstperson.enabled = true;
-      firstperson.applyGravity = controls.applyGravity;
-      firstperson.applyCollision = controls.applyCollision;
-      firstperson.positionEasing = controls.positionEasing;
-      firstperson.actions = actions;
-      firstperson.personModel = personModel;
-    } else {
-      firstperson.enabled = false;
-      var ray = new THREE.Ray();
-      ray.origin.setFromMatrixPosition(camera.matrixWorld);
-      ray.direction.set(0, 0, 1).unproject(camera).sub(ray.origin).normalize();
-    }
-
+    firstperson.enabled = true;
+    firstperson.actions = actions;
+    firstperson.personModel = personModel;
     return () => {
       mixer.stopAllAction();
     };
-  }, [
-    controls.firstEnabled,
-    controls.applyGravity,
-    controls.applyCollision,
-    controls.positionEasing,
-  ]);
+  }, []);
 
   /**根据渲染帧执行 */
   useFrame(() => {
@@ -95,12 +69,11 @@ function PersonModel({ result, personModel }) {
 //相机参数初始化
 function ChangeCamera() {
   const camera = useThree((state) => state.camera);
-  camera.fov = 65; // 修改相机视野
-  camera.aspect = window.innerWidth / window.innerHeight; // 修改相机长度比
-  camera.near = 0.01; // 修改相机近裁剪面距离
-  camera.far = 100; // 修改相机远裁剪面距离
-  camera.position.set(10, 3, 1.5);
-  camera.lookAt(new THREE.Vector3(0, 0, 0));
+  const scene = useThree((state) => state.scene);
+  camera.position.set(0, 2, 1.5);
+  camera.lookAt(new THREE.Vector3(0, 2, 1.5));
+  const helper = new THREE.CameraHelper(camera);
+  scene.add(helper);
 }
 
 export default function App() {
@@ -118,8 +91,9 @@ export default function App() {
     (loader) => {}
   );
   personModel.scene.scale.set(0.5, 0.5, 0.5);
-  personModel.scene.position.set(8.5, 0.4, 1.8);
+  personModel.scene.position.set(8.5, 1.2, 1.8);
   personModel.scene.rotation.y = Math.PI / 2;
+  console.log("personModel.scene", personModel.scene);
   return (
     <Canvas>
       <ChangeCamera />

@@ -3,14 +3,9 @@ import { Suspense, useMemo } from "react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
-import { FirstPersonCameraControl } from "../../../assets/js/firstPersonCameraControl";
+import { FirstPersonCameraControl } from "../../../assets/js/firstPersonCameraControl1";
 
-import {
-  OrbitControls,
-  Stars,
-  KeyboardControls,
-  PointerLockControls,
-} from "@react-three/drei";
+import { OrbitControls, Stars, KeyboardControls } from "@react-three/drei";
 import { useControls } from "leva"; //快速设置gui
 
 /**加载gltf房屋模型 */
@@ -36,32 +31,7 @@ function Model() {
     positionEasing: false,
     threePerson: false,
   };
-
-  // const clock = new THREE.Clock();
-  // const v = new THREE.Vector3(-1, 0, 0);
-
-  // const onChange = (name) => {
-  //   const deltaTime = clock.getDelta();
-  //   if (name === "forward") {
-  //     const deltaPos = v.clone().multiplyScalar(deltaTime);
-  //     console.log(deltaPos);
-  //     camera.position.add(deltaPos); //更新玩家角色的位置
-  //   }
-  // };
-  return (
-    <KeyboardControls
-      map={[
-        { name: "forward", keys: ["ArrowUp", "w", "W"] },
-        { name: "backward", keys: ["ArrowDown", "s", "S"] },
-        { name: "left", keys: ["ArrowLeft", "a", "A"] },
-        { name: "right", keys: ["ArrowRight", "d", "D"] },
-        { name: "jump", keys: ["Space"] },
-      ]}
-      // onChange={onChange}
-    >
-      <primitive object={result.scene} />
-    </KeyboardControls>
-  );
+  return <primitive object={result.scene} />;
 }
 
 //相机参数修改
@@ -91,7 +61,6 @@ export default function App() {
       <Suspense fallback={null}>
         <Model />
       </Suspense>
-      {/* <PointerLockControls /> */}
     </Canvas>
   );
 }

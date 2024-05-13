@@ -6,15 +6,13 @@
 
 import * as THREE from "three";
 export class FirstPersonCameraControl {
-    constructor(camera, domElement, rayCastObjects, actions, personModel) {
+    constructor(camera, domElement, rayCastObjects) {
         this.camera = camera;
         this.domElement = domElement;
         this._isEnabled = false;
         // internal params for move forward/right
         this._rayCastObjects = rayCastObjects;
-        this._actions = actions;
-        this._personModel = personModel;
-        this._rayOriginOffset = new THREE.Vector3(0, 1, 0);
+        this._rayOriginOffset = new THREE.Vector3(0, -1, 0);
         this._camerLocalDirection = new THREE.Vector3();
         this._tmpVector = new THREE.Vector3();
         this._rayCaster = new THREE.Raycaster();
@@ -30,7 +28,7 @@ export class FirstPersonCameraControl {
         this.lookflag = 1;
         this.lookSpeed = 0.008;
         this.moveSpeed = 0.02;
-        this.playerHeight = 0.4;
+        this.playerHeight = 1.4;
         this.g = 9.8;
         // event bindings
         this.bindmousedown = this.onMouseDown.bind(this);
@@ -45,14 +43,6 @@ export class FirstPersonCameraControl {
      */
     set colliders(colliders) {
         this._rayCastObjects = colliders;
-    }
-
-    set actions(actions) {
-        this._actions = actions;
-    }
-
-    set personModel(personModel) {
-        this._personModel = personModel;
     }
 
     /**
@@ -110,9 +100,7 @@ export class FirstPersonCameraControl {
         // euler.y~z轴旋转
         this._euler.y -= movementX * this.lookSpeed;
         this._euler.x -= movementY * this.lookflag * this.lookSpeed;
-        // this.camera.quaternion.setFromEuler(this._euler);
-        this._personModel.scene.quaternion.setFromEuler(this._euler);
-        
+        this.camera.quaternion.setFromEuler(this._euler);
         this._prevMouseX = event.screenX;
         this._prevMouseY = event.screenY;
     }
@@ -185,7 +173,7 @@ export class FirstPersonCameraControl {
      */
     rotateX(value) {
         this._euler.y -= value * this.lookSpeed;
-        this._personModel.scene.quaternion.setFromEuler(this._euler);
+        this.camera.quaternion.setFromEuler(this._euler);
     }
 
     /**
@@ -195,7 +183,7 @@ export class FirstPersonCameraControl {
      */
     rotateY(value) {
         this._euler.x -= value * this.lookflag * 0.5 * this.lookSpeed;
-        this._personModel.scene.quaternion.setFromEuler(this._euler);
+        this.camera.quaternion.setFromEuler(this._euler);
     }
 
     /**
@@ -206,7 +194,6 @@ export class FirstPersonCameraControl {
         this.gravityTest();
         //collision test
         this.collisionTest();
-        console.log(this._camerLocalDirection.x);
     }
 
     gravityTest() {
@@ -221,25 +208,26 @@ export class FirstPersonCameraControl {
                 );
                 if (this.positionEasing) {
                     if (
-                        newPosition.y >= this._personModel.scene.position.y ||
-                        newPosition.y - this._personModel.scene.position.y < 0.2
+                        newPosition.y >= this.camera.position.y ||
+                        newPosition.y - this.camera.position.y < 0.2
                     ) {
                         //上下楼梯时逐步上升 以免明显顿挫感
-                        // this._personModel.scene.position.y +=
-                        //     (this._personModel.scene.position.y - newPosition.y )*0.07
+
+                        this.camera.position.y +=
+                            (newPosition.y - this.camera.position.y) * 0.08;
                         this._fallingTime = 0;
                         isFalling = false;
-                        // return;
+                        return;
                     }
                 } else if (intersect.distance < this.playerHeight) {
-                    this._personModel.scene.position.y = newPosition.y;
+                    this.camera.position.y = newPosition.y;
                     this._fallingTime = 0;
                     isFalling = false;
                 }
             }
 
             if (isFalling) {
-                this._personModel.scene.position.y -=
+                this.camera.position.y -=
                     this.g * Math.pow(this._fallingTime, 2);
             }
         }
@@ -251,33 +239,35 @@ export class FirstPersonCameraControl {
     }
 
     collisionTestX() {
-        this._tmpVector.setFromMatrixColumn(this._personModel.scene.matrix, 0);
-        this._tmpVector.multiplyScalar(this._camerLocalDirection.x); //控制移动
+        this._tmpVector.setFromMatrixColumn(this.camera.matrix, 0);
+        this._tmpVector.multiplyScalar(this._camerLocalDirection.x);
         if (this.applyCollision) {
             const intersect = this.hitTest();
-            if (intersect && intersect.distance < 2) {
+            if (intersect && intersect.distance < 0.3) {
                 return;
             }
         }
-        this._personModel.scene.position.addScaledVector(this._tmpVector, this.moveSpeed);
+
+        this.camera.position.addScaledVector(this._tmpVector, this.moveSpeed);
     }
 
     collisionTestZ() {
-        this._tmpVector.setFromMatrixColumn(this._personModel.scene.matrix, 0);
-        this._tmpVector.crossVectors(this._personModel.scene.up, this._tmpVector);
+        this._tmpVector.setFromMatrixColumn(this.camera.matrix, 0);
+        this._tmpVector.crossVectors(this.camera.up, this._tmpVector);
         this._tmpVector.multiplyScalar(this._camerLocalDirection.z);
         if (this.applyCollision) {
             const intersect = this.hitTest();
-            if (intersect && intersect.distance < 2) {
+            if (intersect && intersect.distance < 0.3) {
                 return;
             }
         }
-        this._personModel.scene.position.addScaledVector(this._tmpVector, this.moveSpeed);
+
+        this.camera.position.addScaledVector(this._tmpVector, this.moveSpeed);
     }
 
     hitTest() {
         let result = null;
-        const origin = this._personModel.scene.position.clone().add(this._rayOriginOffset);
+        const origin = this.camera.position.clone().add(this._rayOriginOffset);
         this._rayCaster.ray.origin = origin;
         this._rayCaster.ray.direction = this._tmpVector;
         const intersect = this._rayCaster.intersectObject(
