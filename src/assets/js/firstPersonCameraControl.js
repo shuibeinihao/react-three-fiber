@@ -202,9 +202,9 @@ export class FirstPersonCameraControl {
      * @description: update current calcuate each frame.
      */
     update() {
-        //gravity test
+        //重力感应
         this.gravityTest();
-        //collision test
+        //碰撞检测
         this.collisionTest();
         console.log(this._camerLocalDirection.x);
     }
@@ -255,7 +255,7 @@ export class FirstPersonCameraControl {
         this._tmpVector.multiplyScalar(this._camerLocalDirection.x); //控制移动
         if (this.applyCollision) {
             const intersect = this.hitTest();
-            if (intersect && intersect.distance < 2) {
+            if (intersect && intersect.distance < 0.3) { //x轴碰撞检测
                 return;
             }
         }
@@ -265,10 +265,10 @@ export class FirstPersonCameraControl {
     collisionTestZ() {
         this._tmpVector.setFromMatrixColumn(this._personModel.scene.matrix, 0);
         this._tmpVector.crossVectors(this._personModel.scene.up, this._tmpVector);
-        this._tmpVector.multiplyScalar(this._camerLocalDirection.z);
+        this._tmpVector.multiplyScalar(this._camerLocalDirection.z);//控制移动
         if (this.applyCollision) {
             const intersect = this.hitTest();
-            if (intersect && intersect.distance < 2) {
+            if (intersect && intersect.distance < 2) {//z轴碰撞检测
                 return;
             }
         }
