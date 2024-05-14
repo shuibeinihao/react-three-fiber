@@ -206,6 +206,8 @@ export class FirstPersonCameraControl {
                 const newPosition = intersect.point.add(
                     new THREE.Vector3(0, this.playerHeight, 0)
                 );
+                console.log('newPosition.y',newPosition.y);
+                console.log('this.camera.position.y',this.camera.position.y)
                 if (this.positionEasing) {
                     if (
                         newPosition.y >= this.camera.position.y ||

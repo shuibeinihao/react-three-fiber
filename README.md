@@ -9,6 +9,5 @@ Currently, two official plugins are available:
 
 # 问题列表
 
-## 1、重力感应有问题 gravityTest方法
 ## 2、碰撞检测围栏处不起效果 collisionTest方法
 ## 3、鼠标点击之后方向会变 onMouseMove方法

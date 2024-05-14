@@ -30,7 +30,7 @@ export class FirstPersonCameraControl {
         this.lookflag = 1;
         this.lookSpeed = 0.008;
         this.moveSpeed = 0.02;
-        this.playerHeight = 0.4;
+        this.playerHeight = 0.77;
         this.g = 9.8;
         // event bindings
         this.bindmousedown = this.onMouseDown.bind(this);
@@ -218,18 +218,20 @@ export class FirstPersonCameraControl {
             if (intersect) {
                 const newPosition = intersect.point.add(
                     new THREE.Vector3(0, this.playerHeight, 0)
-                );
+                );//this.playerHeight 控制newPosition.y 初始值要和this._personModel.scene.position.y一致
+                console.log('newPosition.y',newPosition.y);
+                console.log('this._personModel.scene.position.y',this._personModel.scene.position.y)
                 if (this.positionEasing) {
                     if (
                         newPosition.y >= this._personModel.scene.position.y ||
                         newPosition.y - this._personModel.scene.position.y < 0.2
                     ) {
                         //上下楼梯时逐步上升 以免明显顿挫感
-                        // this._personModel.scene.position.y +=
-                        //     (this._personModel.scene.position.y - newPosition.y )*0.07
+                        this._personModel.scene.position.y +=
+                            (newPosition.y - this._personModel.scene.position.y)*0.07
                         this._fallingTime = 0;
                         isFalling = false;
-                        // return;
+                        return;
                     }
                 } else if (intersect.distance < this.playerHeight) {
                     this._personModel.scene.position.y = newPosition.y;
@@ -268,7 +270,7 @@ export class FirstPersonCameraControl {
         this._tmpVector.multiplyScalar(this._camerLocalDirection.z);//控制移动
         if (this.applyCollision) {
             const intersect = this.hitTest();
-            if (intersect && intersect.distance < 2) {//z轴碰撞检测
+            if (intersect && intersect.distance < 0.3) {//z轴碰撞检测
                 return;
             }
         }

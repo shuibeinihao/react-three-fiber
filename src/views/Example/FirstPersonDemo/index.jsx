@@ -1,11 +1,11 @@
-import { Canvas, useLoader, useThree } from "@react-three/fiber";
-import { Suspense, useMemo } from "react";
+import { Canvas, useLoader, useThree, useFrame } from "@react-three/fiber";
+import { Suspense } from "react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import { FirstPersonCameraControl } from "../../../assets/js/firstPersonCameraControl1";
 
-import { OrbitControls, Stars, KeyboardControls } from "@react-three/drei";
+import { Stars } from "@react-three/drei";
 import { useControls } from "leva"; //快速设置gui
 
 /**加载gltf房屋模型 */
@@ -22,15 +22,12 @@ function Model() {
     return state.gl;
   });
   const firstperson = new FirstPersonCameraControl(camera, renderer.domElement);
-  firstperson.enabled = false;
-
-  let settings = {
-    firstPerson: false,
-    gravity: false,
-    collision: false,
-    positionEasing: false,
-    threePerson: false,
-  };
+  firstperson.enabled = true;
+  firstperson.colliders = result.scene;
+  /**根据渲染帧执行 */
+  useFrame(() => {
+    firstperson.update();
+  });
   return <primitive object={result.scene} />;
 }
 
@@ -40,11 +37,6 @@ function ChangeCamera() {
   camera.position.set(10, 3, 1.5);
   camera.lookAt(new THREE.Vector3(0, 0, 0));
 }
-
-function onSettingsChange() {
-  console.log(222222);
-}
-
 export default function App() {
   const { axesHelperLength } = useControls({ axesHelperLength: 10 });
   useControls({
@@ -57,7 +49,6 @@ export default function App() {
       <Stars />
       <axesHelper args={[axesHelperLength]} />
       <ambientLight intensity={Math.PI} />
-      <OrbitControls />
       <Suspense fallback={null}>
         <Model />
       </Suspense>
